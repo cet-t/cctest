@@ -2,38 +2,183 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="stylesheet" href="styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tauri App</title>
-    <script type="module" src="/main.js" defer></script>
+    <title>Gesture App</title>
+    <link rel="stylesheet" href="/styles.css" />
   </head>
 
   <body>
-    <main class="container">
-      <h1>Welcome to Tauri</h1>
+    <div id="app">
+      <div class="app-container">
+        <header class="app-header">
+          <h1>Mouse Gesture App</h1>
+          <nav class="app-nav">
+            <button class="nav-button active" data-page="dashboard">Dashboard</button>
+            <button class="nav-button" data-page="recorder">Recorder</button>
+            <button class="nav-button" data-page="settings">Settings</button>
+            <button class="nav-button" data-page="theme">Theme</button>
+          </nav>
+        </header>
 
-      <div class="row">
-        <a href="https://tauri.app" target="_blank">
-          <img src="/assets/tauri.svg" class="logo tauri" alt="Tauri logo" />
-        </a>
-        <a
-          href="https://developer.mozilla.org/en-US/docs/Web/JavaScript"
-          target="_blank"
-        >
-          <img
-            src="/assets/javascript.svg"
-            class="logo vanilla"
-            alt="JavaScript logo"
-          />
-        </a>
+        <main class="app-main">
+          <!-- Dashboard Page -->
+          <div id="dashboard" class="page active">
+            <div class="page-content">
+              <h2>Dashboard</h2>
+              <div class="status-section">
+                <h3>Status</h3>
+                <div class="status-item">
+                  <label>Gestures Enabled:</label>
+                  <span id="status-enabled" class="status-value">Loading...</span>
+                </div>
+                <div class="status-item">
+                  <label>Active Window:</label>
+                  <span id="status-window" class="status-value">-</span>
+                </div>
+                <div class="status-item">
+                  <label>Recent Gestures:</label>
+                  <ul id="recent-gestures" class="gesture-list"></ul>
+                </div>
+              </div>
+              <div class="controls-section">
+                <button id="toggle-listening" class="btn btn-primary">Start Listening</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gesture Recorder Page -->
+          <div id="recorder" class="page">
+            <div class="page-content">
+              <h2>Record Gesture</h2>
+              <div class="recorder-section">
+                <canvas id="gesture-canvas" class="gesture-canvas"></canvas>
+                <div class="gesture-info">
+                  <p>Hold right mouse button and draw to record a gesture</p>
+                </div>
+              </div>
+              <div class="recorder-controls">
+                <div class="form-group">
+                  <label for="gesture-name">Gesture Name:</label>
+                  <input type="text" id="gesture-name" placeholder="e.g., swipe_left" />
+                </div>
+                <div class="form-group">
+                  <label for="gesture-buttons">Buttons:</label>
+                  <select id="gesture-buttons" multiple>
+                    <option value="right" selected>Right</option>
+                    <option value="left">Left</option>
+                    <option value="middle">Middle</option>
+                  </select>
+                </div>
+                <div class="button-group">
+                  <button id="save-gesture" class="btn btn-success">Save Gesture</button>
+                  <button id="clear-gesture" class="btn btn-secondary">Clear</button>
+                </div>
+              </div>
+              <div id="gesture-result" class="gesture-result"></div>
+            </div>
+          </div>
+
+          <!-- Settings Page -->
+          <div id="settings" class="page">
+            <div class="page-content">
+              <h2>Settings</h2>
+
+              <div class="settings-tabs">
+                <button class="settings-tab-button active" data-tab="global">Global Settings</button>
+                <button class="settings-tab-button" data-tab="apps">Per-App Settings</button>
+              </div>
+
+              <!-- Global Settings Tab -->
+              <div id="global-tab" class="settings-tab active">
+                <div class="form-section">
+                  <h3>Global Configuration</h3>
+                  <div class="form-group">
+                    <label for="global-enabled">
+                      <input type="checkbox" id="global-enabled" />
+                      Enable Gestures
+                    </label>
+                  </div>
+                  <div class="form-group">
+                    <label for="global-sensitivity">Sensitivity:</label>
+                    <input type="range" id="global-sensitivity" min="0.1" max="1.0" step="0.1" />
+                    <span id="sensitivity-value">0.8</span>
+                  </div>
+                  <div class="form-group">
+                    <label for="global-min-length">Minimum Gesture Length:</label>
+                    <input type="number" id="global-min-length" min="10" max="200" />
+                  </div>
+                  <button id="save-global-settings" class="btn btn-primary">Save Global Settings</button>
+                </div>
+              </div>
+
+              <!-- Per-App Settings Tab -->
+              <div id="apps-tab" class="settings-tab">
+                <div class="form-section">
+                  <h3>Per-Application Settings</h3>
+                  <div class="form-group">
+                    <label for="app-selector">Select Application:</label>
+                    <select id="app-selector">
+                      <option value="">Add new app</option>
+                    </select>
+                  </div>
+                  <div id="app-settings-content"></div>
+                  <button id="save-app-settings" class="btn btn-primary" style="display: none;">Save App Settings</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Theme Page -->
+          <div id="theme" class="page">
+            <div class="page-content">
+              <h2>Theme Settings</h2>
+              <div class="theme-section">
+                <h3>Theme Mode</h3>
+                <div class="form-group">
+                  <label>
+                    <input type="radio" name="theme-mode" value="light" />
+                    Light
+                  </label>
+                  <label>
+                    <input type="radio" name="theme-mode" value="dark" />
+                    Dark
+                  </label>
+                  <label>
+                    <input type="radio" name="theme-mode" value="sync" checked />
+                    Sync with System
+                  </label>
+                  <label>
+                    <input type="radio" name="theme-mode" value="custom" />
+                    Custom
+                  </label>
+                </div>
+              </div>
+              <div id="custom-theme-section" style="display: none;" class="theme-section">
+                <h3>Custom Theme Colors</h3>
+                <div class="form-group">
+                  <label for="theme-primary">Primary Color:</label>
+                  <input type="color" id="theme-primary" value="#007bff" />
+                </div>
+                <div class="form-group">
+                  <label for="theme-secondary">Secondary Color:</label>
+                  <input type="color" id="theme-secondary" value="#6c757d" />
+                </div>
+                <div class="form-group">
+                  <label for="theme-background">Background Color:</label>
+                  <input type="color" id="theme-background" value="#ffffff" />
+                </div>
+                <div class="form-group">
+                  <label for="theme-text">Text Color:</label>
+                  <input type="color" id="theme-text" value="#000000" />
+                </div>
+                <button id="save-theme" class="btn btn-primary">Save Custom Theme</button>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
-      <p>Click on the Tauri logo to learn more about the framework</p>
+    </div>
 
-      <form class="row" id="greet-form">
-        <input id="greet-input" placeholder="Enter a name..." />
-        <button type="submit">Greet</button>
-      </form>
-      <p id="greet-msg"></p>
-    </main>
+    <script type="module" src="/main.js"></script>
   </body>
 </html>
