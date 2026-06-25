@@ -1,7 +1,9 @@
 use crate::GesturePoint;
 use serde_json::json;
 
-pub fn detect_gesture(points: &[GesturePoint]) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+pub fn detect_gesture(
+    points: &[GesturePoint],
+) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     if points.len() < 3 {
         return Ok(json!({
             "gesture": "none",
@@ -43,7 +45,12 @@ fn simplify_path(points: &[GesturePoint], epsilon: f32) -> Vec<(i32, i32)> {
         let max_dist = coords[index + 1..]
             .iter()
             .enumerate()
-            .map(|(i, &p)| (i + 1, perpendicular_distance(p, coords[index], coords[coords.len() - 1])))
+            .map(|(i, &p)| {
+                (
+                    i + 1,
+                    perpendicular_distance(p, coords[index], coords[coords.len() - 1]),
+                )
+            })
             .max_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
 
         if let Some((i, dist)) = max_dist {
@@ -59,7 +66,10 @@ fn simplify_path(points: &[GesturePoint], epsilon: f32) -> Vec<(i32, i32)> {
     }
 
     simplified.push(*coords.last().unwrap());
-    simplified.into_iter().map(|(x, y)| (x as i32, y as i32)).collect()
+    simplified
+        .into_iter()
+        .map(|(x, y)| (x as i32, y as i32))
+        .collect()
 }
 
 fn perpendicular_distance(point: (f32, f32), start: (f32, f32), end: (f32, f32)) -> f32 {
@@ -119,7 +129,8 @@ fn classify_gesture(points: &[(i32, i32)], direction: &str) -> String {
         })
         .sum::<f32>();
 
-    let direct_distance = ((end.0 - start.0).pow(2) as f32 + (end.1 - start.1).pow(2) as f32).sqrt();
+    let direct_distance =
+        ((end.0 - start.0).pow(2) as f32 + (end.1 - start.1).pow(2) as f32).sqrt();
 
     let straightness = if total_distance > 0.0 {
         direct_distance / total_distance
